@@ -1,4 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
+# -*-coding:utf8-*-
 import rospy
 from sensor_msgs.msg import JointState
 from piper_sdk import C_PiperInterface_V2
