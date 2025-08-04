@@ -28,8 +28,10 @@ setup(
     entry_points={
         'console_scripts': [
             'piper_single_ctrl = piper.piper_ctrl_single_node:main',
+            'piper_single_ctrl_delay_test = piper.piper_ctrl_single_node_delay_test:main',
             'piper_ms_ctrl = piper.piper_start_ms_node:main',
             'piper_read_master = piper.piper_read_master_node:main',
+            'delay_test = piper.delay_test_node:main',
         ],
     },
 )
