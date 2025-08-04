@@ -74,10 +74,12 @@ class PiperRosNode(Node):
 
         self.publisher_thread = threading.Thread(target=self.publish_thread)
         self.publisher_thread.start()
+
         self.send = False
         self.get = False
-        
         self.armSeq = self.piper.GetArmSeq().seq
+        self.seq_start = None
+
         # 发布频率 下发101的判断条件（M1主控判断运动完成:seq2!=0; M2上位机判断运动完成:gripper_angle<=0）
         self.csv = open(f"seq200hz{self.delay_test_mode}.csv", "w", encoding="utf-8")
 
@@ -143,15 +145,16 @@ class PiperRosNode(Node):
         if not self.send and seq >= 1000 and seq < 2500:
             self.piper.GripperCtrl(0, 1000, 1, 0)
             self.send = True
-            self.csv.write(f"{seq},")   # 记录下发控制指令时的seq
+            self.seq_start = seq    # 记录下发控制指令时的seq
         elif self.send and seq >= 2500:
             self.piper.GripperCtrl(100000, 1000, 1, 0)
             self.send = False
         
         # 捕获seq的变化，并写入csv文件
-        if not self.get and seq3_temp != 0 and seq2_temp != 0 and seq1_temp != 0:
+        if not self.get and self.seq_start is not None and seq3_temp != 0 and seq2_temp != 0 and seq1_temp != 0:
             self.get = True
-            self.csv.write(f"{seq},{seq1_temp},{seq2_temp},{seq3_temp}\n")
+            self.csv.write(f"{self.seq_start},{seq},{seq1_temp},{seq2_temp},{seq3_temp}\n")
+            self.seq_start = None
         elif self.get and seq3_temp == 0:
             self.get = False
 
