@@ -14,7 +14,7 @@ import threading
 import argparse
 import math
 from piper_sdk import *
-from piper_sdk import C_PiperInterface
+from piper_sdk import C_PiperInterface_V2
 from std_srvs.srv import Trigger, TriggerResponse
 from piper_msgs.msg import PiperStatusMsg, PosCmd, PiperEulerPose
 from piper_msgs.srv import Enable, EnableResponse
@@ -110,7 +110,7 @@ class C_PiperRosNode():
         self.joint_states.effort = [0.0] * 7
         
         # 创建piper类并打开can接口
-        self.piper = C_PiperInterface(can_name=self.can_port)
+        self.piper = C_PiperInterface_V2(can_name=self.can_port)
         self.piper.ConnectPort()
         self.piper.MotionCtrl_2(0x01, 0x01, 30,0)
         self.block_ctrl_flag = False
@@ -162,7 +162,7 @@ class C_PiperRosNode():
                         self.piper.GetArmLowSpdInfoMsgs().motor_6.foc_status.driver_enable_status
                     print("使能状态:",enable_flag)
                     self.piper.EnableArm(7)
-                    self.piper.GripperCtrl(0,1000,0x01, 0)
+                    self.piper.GripperCtrl(100000,1000,0x01, 0)
                     if(enable_flag):
                         self.__enable_flag = True
                     print("--------------------")
