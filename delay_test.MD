@@ -11,6 +11,7 @@ git clone -b delay_test_042beta https://github.com/kehuanjack/piper_sdk.git
 ```shell
 cd piper_sdk
 pip3 install .
+cd ..
 ```
 
 ## 3 克隆时延测试专用的ROS仓库
