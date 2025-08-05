@@ -16,6 +16,7 @@ from piper_msgs.srv import Enable
 from geometry_msgs.msg import Pose
 from scipy.spatial.transform import Rotation as R  # For Euler angle to quaternion conversion
 from numpy import clip
+import os, ament_index_python
 
 
 class PiperRosNode(Node):
@@ -67,6 +68,18 @@ class PiperRosNode(Node):
         self.piper = C_PiperInterface_V2(can_name=self.can_port)
         self.piper.ConnectPort()
 
+        self.send = False
+        self.get = False
+        self.armSeq = self.piper.GetArmSeq().seq
+        self.seq_start = None
+
+        # 发布频率 下发101的判断条件（M1主控判断运动完成:seq2!=0; M2上位机判断运动完成:gripper_angle<=0）
+        pkg_share_dir = ament_index_python.get_package_share_directory('piper')
+        install_dir = os.path.dirname(os.path.dirname(os.path.dirname(pkg_share_dir)))
+        workspace_path = os.path.dirname(install_dir)
+        csv_path = os.path.join(workspace_path, f"seq200hz{self.delay_test_mode}.csv")
+        self.csv = open(csv_path, "w", encoding="utf-8")
+
         # Start subscription thread
         self.create_subscription(PosCmd, 'pos_cmd', self.pos_callback, 1)
         self.create_subscription(JointState, 'joint_ctrl_single', self.joint_callback, 1)
@@ -74,14 +87,6 @@ class PiperRosNode(Node):
 
         self.publisher_thread = threading.Thread(target=self.publish_thread)
         self.publisher_thread.start()
-
-        self.send = False
-        self.get = False
-        self.armSeq = self.piper.GetArmSeq().seq
-        self.seq_start = None
-
-        # 发布频率 下发101的判断条件（M1主控判断运动完成:seq2!=0; M2上位机判断运动完成:gripper_angle<=0）
-        self.csv = open(f"seq200hz{self.delay_test_mode}.csv", "w", encoding="utf-8")
 
     def GetEnableFlag(self):
         return self.__enable_flag
