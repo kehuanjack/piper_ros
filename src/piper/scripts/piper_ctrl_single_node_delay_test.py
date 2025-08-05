@@ -23,6 +23,7 @@ from piper_msgs.srv import GoZero, GoZeroResponse
 from geometry_msgs.msg import Pose, PoseStamped
 from tf.transformations import quaternion_from_euler  # 用于欧拉角到四元数的转换
 import numpy as np
+import os, rospkg
 
 def check_ros_master():
     try:
@@ -114,6 +115,19 @@ class C_PiperRosNode():
         self.piper.ConnectPort()
         self.piper.MotionCtrl_2(0x01, 0x01, 30,0)
         self.block_ctrl_flag = False
+
+        self.send = False
+        self.get = False
+        self.armSeq = self.piper.GetArmSeq().seq
+        self.seq_start = None
+
+        # 发布频率 下发101的判断条件（M1主控判断运动完成:seq2!=0; M2上位机判断运动完成:gripper_angle<=0）
+        rospack = rospkg.RosPack()
+        pkg_path = rospack.get_path('piper')
+        workspace_path = os.path.dirname(os.path.dirname(pkg_path))
+        csv_path = os.path.join(workspace_path, f"seq200hz{self.delay_test_mode}.csv")
+        self.csv = open(csv_path, "w", encoding="utf-8")
+
         # 启动订阅线程
         sub_pos_th = threading.Thread(target=self.SubPosThread)
         sub_pos_th.daemon = True
@@ -126,14 +140,6 @@ class C_PiperRosNode():
         
         sub_joint_th.start()
         sub_enable_th.start()
-
-        self.send = False
-        self.get = False
-        self.armSeq = self.piper.GetArmSeq().seq
-        self.seq_start = None
-
-        # 发布频率 下发101的判断条件（M1主控判断运动完成:seq2!=0; M2上位机判断运动完成:gripper_angle<=0）
-        self.csv = open(f"seq200hz{self.delay_test_mode}.csv", "w", encoding="utf-8")
 
     def GetEnableFlag(self):
         return self.__enable_flag
@@ -601,5 +607,6 @@ if __name__ == '__main__':
     try:
         piper_signle = C_PiperRosNode()
         piper_signle.Pubilsh()
+        piper_signle.csv.close()
     except rospy.ROSInterruptException:
         pass

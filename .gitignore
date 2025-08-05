@@ -13,7 +13,6 @@ src/piper/backup
 analytical_solution
 oculus_reader
 __pycache__
-CATKIN_IGNORE
 log
 seq200hzM2.csv
 seq200hzM1.csv
