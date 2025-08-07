@@ -1,6 +1,8 @@
 # 时延测试步骤（夹爪电机）
 
-## 1 联系售后获取时延测试专用的固件，并用Windows上位机进行固件的更换
+## 1 获取时延测试专用的固件，并用Windows上位机进行固件的更换
+
+[获取时延测试固件](https://github.com/kehuanjack/piper_sdk/releases/tag/4.0.2_beta_delay_test)
 
 ## 2 安装时延测试专用的sdk
 
